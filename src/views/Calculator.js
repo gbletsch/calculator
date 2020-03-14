@@ -14,11 +14,19 @@ class Calculator extends Component {
   handleNumber (e) {
     const state = this.state
     const value = e.target.value
+    let visorLength = state.visor.length
     if (state.eraseVisor) {
       state.eraseVisor = false
       state.visor = ''
     }
-    if (state.visor.length < 8) {
+    const decimalIndex = state.visor.indexOf('.')
+    let decimalLength = 0
+    if (decimalIndex >= 0) {
+      decimalLength = state.visor.slice(decimalIndex + 1).length
+      visorLength -= 1
+    }
+
+    if (visorLength < 8 && decimalLength < 3) {
       state.visor += value
       this.setState(state)
     }
@@ -48,29 +56,33 @@ class Calculator extends Component {
       }
       this.setState(state)
       return
+    } else if (newOperator === '+/-') {
+      state.visor = (-1 * visorNum).toString()
+      this.setState(state)
+      return
     }
 
     switch (state.operator) {
       case '+':
-        state.visor = (tempNum + visorNum).toString()
+        state.visor = ((Math.round((tempNum + visorNum) * 1000)) / 1000).toString()
         state.temp = state.visor
         state.operator = newOperator
         state.eraseVisor = true
         break
       case '-':
-        state.visor = (tempNum - visorNum).toString()
+        state.visor = ((Math.round((tempNum - visorNum) * 1000)) / 1000).toString()
         state.temp = state.visor
         state.operator = newOperator
         state.eraseVisor = true
         break
       case '/':
-        state.visor = (tempNum / visorNum).toString()
+        state.visor = ((Math.round((tempNum / visorNum) * 1000)) / 1000).toString()
         state.temp = state.visor
         state.operator = newOperator
         state.eraseVisor = true
         break
       case '*':
-        state.visor = (tempNum * visorNum).toString()
+        state.visor = ((Math.round((tempNum * visorNum) * 1000)) / 1000).toString()
         state.temp = state.visor
         state.operator = newOperator
         state.eraseVisor = true
@@ -87,17 +99,14 @@ class Calculator extends Component {
       state.temp = ''
       state.eraseVisor = true
     }
-    if (state.visor.length > 8) {
+    const visorLength = state.visor.slice(0, state.visor.indexOf('.')).length
+    if (visorLength > 8) {
       state.visor = 'ERR'
       state.temp = ''
       state.operator = ''
       state.eraseVisor = true
     }
     this.setState(state)
-  }
-
-  componentDidUpdate () {
-    console.log(this.state)
   }
 
   render () {
@@ -134,6 +143,7 @@ class Calculator extends Component {
         </div>
         <div className='w3-row'>
           <input className='w3-button' type='button' value='0' onClick={(e) => this.handleNumber(e)} />
+          <input className='w3-button' type='button' value='+/-' onClick={(e) => this.handleOperator(e)} />
           <input className='w3-button' type='button' value='=' onClick={(e) => this.handleOperator(e)} />
 
         </div>
