@@ -6,102 +6,103 @@ class Calculator extends Component {
     this.state = {
       visor: '',
       temp: '',
-      breadcrumbs: '',
       operator: '',
       eraseVisor: false
     }
-  }
-
-  eraseVisor () {
-    const state = this.state
-    state.visor = ''
-    state.eraseVisor = false
-    this.setState(state)
   }
 
   handleNumber (e) {
     const state = this.state
     const value = e.target.value
     if (state.eraseVisor) {
-      this.eraseVisor()
+      state.eraseVisor = false
+      state.visor = ''
     }
-    state.visor += value
-    state.breadcrumbs = this.incrementBreadcrumbs(state.breadcrumbs, value)
-    this.setState(state)
-  }
-
-  incrementBreadcrumbs (breadcrumbs, value) {
-    // if (breadcrumbs.length >= 18) {
-    if (breadcrumbs.length % 18 === 0 && breadcrumbs.length !== 0) {
-      breadcrumbs += '\n'
+    if (state.visor.length < 8) {
+      state.visor += value
+      this.setState(state)
     }
-    return breadcrumbs + value
   }
 
   handleOperator (e) {
     const state = this.state
     const newOperator = e.target.value
-    state.breadcrumbs = this.incrementBreadcrumbs(state.breadcrumbs, newOperator)
     const visorNum = Number(state.visor)
     const tempNum = Number(state.temp)
 
-    switch (state.operator) {
-      case 'AC':
-        state.visor = ''
+    if (newOperator === 'AC') {
+      state.visor = ''
+      state.temp = ''
+      state.operator = ''
+      state.eraseVisor = false
+      this.setState(state)
+      return
+    } else if (newOperator === 'C') {
+      if (state.eraseVisor) {
+        state.visor = state.temp
         state.temp = ''
-        state.breadcrumbs = ''
+        state.operator = ''
         state.eraseVisor = false
-        break
+      } else {
+        state.visor = ''
+      }
+      this.setState(state)
+      return
+    }
+
+    switch (state.operator) {
       case '+':
         state.visor = (tempNum + visorNum).toString()
         state.temp = state.visor
-        state.eraseVisor = true
         state.operator = newOperator
+        state.eraseVisor = true
         break
       case '-':
         state.visor = (tempNum - visorNum).toString()
         state.temp = state.visor
-        state.eraseVisor = true
         state.operator = newOperator
+        state.eraseVisor = true
         break
       case '/':
         state.visor = (tempNum / visorNum).toString()
         state.temp = state.visor
-        state.eraseVisor = true
         state.operator = newOperator
+        state.eraseVisor = true
         break
       case '*':
         state.visor = (tempNum * visorNum).toString()
         state.temp = state.visor
-        state.eraseVisor = true
         state.operator = newOperator
+        state.eraseVisor = true
         break
       default:
+        state.operator = newOperator
+        state.temp = state.visor
+        state.eraseVisor = true
         break
     }
-    // if (newOperator === '=') {
-    //   state.operator = ''
-    //   state.temp = '' // state.visor
-    //   state.breadcrumbs = '' // state.visor
-    // //   state.visor = ''
-    // } else {
-    //   state.operator = newOperator
-    // }
+
+    if (state.operator === '=') {
+      state.operator = ''
+      state.temp = ''
+      state.eraseVisor = true
+    }
+    if (state.visor.length > 8) {
+      state.visor = 'ERR'
+      state.temp = ''
+      state.operator = ''
+      state.eraseVisor = true
+    }
     this.setState(state)
   }
 
-  UNSAFE_componentWillUpdate () {
+  componentDidUpdate () {
     console.log(this.state)
   }
 
   render () {
     return (
       <div className='w3-container w3-theme w3-card' style={{ width: 205 }}>
-        <div className='w3-row'>
-          <div className='w3-col' style={{ textAlign: 'right', minHeight: 52 }}>
-            <p>{this.state.breadcrumbs}</p>
-          </div>
-        </div>
         <div className='w3-row'>
           <div className='w3-col' style={{ textAlign: 'right', height: 25 }}>
             {this.state.visor}
